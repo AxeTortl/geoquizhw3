@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding :ActivityMainBinding
 
-    private val questionBank = listOf(
+    private val questionBank = mutableListOf(
         Question(R.string.question_australia, answer = true),
         Question(R.string.question_oceans, answer = true),
         Question(R.string.question_mideast, answer = false),
@@ -30,19 +30,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.trueButton.setOnClickListener { view: View ->
-            Snackbar.make(
-                view,
-                R.string.correct_snackbar,
-                Snackbar.LENGTH_SHORT
-            ).show()
+          checkAnswer(true)
         }
 
         binding.falseButton.setOnClickListener { view: View ->
-            Snackbar.make(
-                view,
-                R.string.incorrect_snackbar,
-                Snackbar.LENGTH_SHORT
-            ).show()
+            checkAnswer(false)
         }
 
         binding.questionTextview.setOnClickListener {
@@ -66,7 +58,37 @@ class MainActivity : AppCompatActivity() {
     private fun updateQuestion() {
         val questionTextResId = questionBank[currentIndex].textResId
         binding.questionTextview.setText(questionTextResId)
+
+        if (!questionBank[currentIndex].answered) {
+            binding.trueButton.isEnabled = true
+            binding.falseButton.isEnabled = true
+        } else {
+            binding.trueButton.isEnabled = false
+            binding.falseButton.isEnabled = false
+        }
     }
+    private fun checkAnswer(userAnswer: Boolean) {
+        val correctAnswer = questionBank[currentIndex].answer
+        questionBank[currentIndex].answered = true
+
+        binding.trueButton.isEnabled = false
+        binding.falseButton.isEnabled = false
+
+        if (userAnswer == correctAnswer) {
+            Snackbar.make(
+                binding.root,
+                R.string.correct_snackbar,
+                Snackbar.LENGTH_SHORT
+            ).show()
+        } else {
+            Snackbar.make(
+                binding.root,
+                R.string.incorrect_snackbar,
+                Snackbar.LENGTH_SHORT
+            ).show()
+        }
+    }
+
 
     override fun onStart(){
         super.onStart()
