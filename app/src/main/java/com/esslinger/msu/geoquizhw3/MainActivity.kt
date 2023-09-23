@@ -4,10 +4,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import com.esslinger.msu.geoquizhw3.databinding.ActivityMainBinding
 import com.google.android.material.snackbar.Snackbar
 
 private const val TAG = "MainActivity"
+private var correctAnswersCount = 0
 
 class MainActivity : AppCompatActivity() {
 
@@ -55,6 +57,22 @@ class MainActivity : AppCompatActivity() {
         updateQuestion()
     }
 
+    private fun showQuizScore() {
+        val score = (correctAnswersCount.toDouble() / questionBank.size.toDouble()) * 100
+        val formattedScore = String.format("%.1f%%", score)
+
+        Toast.makeText(this, "Quiz Score: $formattedScore", Toast.LENGTH_SHORT).show()
+
+        correctAnswersCount = 0
+
+        for (question in questionBank) {
+            question.answered = false
+        }
+        currentIndex = 0
+        updateQuestion()
+    }
+
+
     private fun updateQuestion() {
         val questionTextResId = questionBank[currentIndex].textResId
         binding.questionTextview.setText(questionTextResId)
@@ -69,26 +87,31 @@ class MainActivity : AppCompatActivity() {
     }
     private fun checkAnswer(userAnswer: Boolean) {
         val correctAnswer = questionBank[currentIndex].answer
-        questionBank[currentIndex].answered = true
+        if (!questionBank[currentIndex].answered) {
+            questionBank[currentIndex].answered = true
 
-        binding.trueButton.isEnabled = false
-        binding.falseButton.isEnabled = false
+            binding.trueButton.isEnabled = false
+            binding.falseButton.isEnabled = false
 
-        if (userAnswer == correctAnswer) {
-            Snackbar.make(
-                binding.root,
-                R.string.correct_snackbar,
-                Snackbar.LENGTH_SHORT
-            ).show()
-        } else {
-            Snackbar.make(
-                binding.root,
-                R.string.incorrect_snackbar,
-                Snackbar.LENGTH_SHORT
-            ).show()
+            if (userAnswer == correctAnswer) {
+                correctAnswersCount++
+                Snackbar.make(
+                    binding.root,
+                    R.string.correct_snackbar,
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            } else {
+                Snackbar.make(
+                    binding.root,
+                    R.string.incorrect_snackbar,
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            }
+            if (currentIndex == questionBank.size - 1) {
+                showQuizScore()
+            }
         }
     }
-
 
     override fun onStart(){
         super.onStart()
